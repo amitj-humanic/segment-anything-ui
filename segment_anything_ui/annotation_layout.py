@@ -153,6 +153,7 @@ class AnnotationLayout(QWidget):
         self.parent().image_label.change_paint_type(PaintType.POINT)
 
     def on_add_box(self):
+        print(f'{__file__} on_add_box')
         self.parent().info_label.setText("Adding box annotation!")
         self.parent().image_label.change_paint_type(PaintType.BOX)
 
@@ -167,6 +168,7 @@ class AnnotationLayout(QWidget):
         self.parent().update(self.parent().annotator.merge_image_visualization())
 
     def on_save_annotation(self):
+        print(f'--> {__file__} on_save_annotation')
         if self.parent().image_label.paint_type == PaintType.POLYGON:
             self.parent().annotator.last_mask = self.parent().image_label.polygon.to_mask(
                 self.config.window_size[0], self.config.window_size[1])

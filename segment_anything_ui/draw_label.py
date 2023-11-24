@@ -166,6 +166,7 @@ class DrawLabel(QtWidgets.QLabel):
                 self.bounding_box.yend = cursor_event.pos().y()
                 self.partial_box = BoundingBox(-1, -1, -1, -1)
         if not self._paint_type == PaintType.MASK_PICKER:
+            print(f'{__file__} mouseReleaseEvent')
             self.parent().annotator.make_prediction(self.get_annotations())
             self.parent().annotator.visualize_last_mask()
         self.update()

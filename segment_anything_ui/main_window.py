@@ -40,6 +40,7 @@ class SegmentAnythingUI(QWidget):
         self.show()
 
     def set_image(self, image: np.ndarray):
+        print(f'{__file__} set_image {image.shape = }')
         self.annotator.set_image(image).make_embedding()
         self.annotator.clear()
         self.update(image)
@@ -60,8 +61,8 @@ class SegmentAnythingUI(QWidget):
             return None
         return sam
 
-    def get_mask(self):
-        return self.annotator.make_instance_mask()
+    def get_mask(self, mask_path, actual_shape):
+        return self.annotator.make_instance_mask(mask_path, actual_shape)
 
     def get_labels(self):
         return self.annotator.make_labels()

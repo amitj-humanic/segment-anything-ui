@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import os
 
@@ -31,14 +33,16 @@ class KeyBindings:
 
 @dataclasses.dataclass
 class Config:
-    default_weights: str = "sam_vit_b_01ec64.pth"
+    #default_weights: str = "sam_vit_b_01ec64.pth"
+    default_weights: str = "../segment-anything/demo/sam_vit_b_01ec64.pth"
     label_file: str = "labels.json"
     window_size: tuple[int, int] | int = (1600, 900)
     key_mapping: KeyBindings = dataclasses.field(default_factory=KeyBindings)
 
     def __post_init__(self):
         if isinstance(self.window_size, int):
-            self.window_size = (self.window_size, self.window_size)
+            #self.window_size = (self.window_size, self.window_size)
+            pass
 
     def get_model_name(self):
         return "_".join(os.path.basename(self.default_weights).split("_")[1:3])

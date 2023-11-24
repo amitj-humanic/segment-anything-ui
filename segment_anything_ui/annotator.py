@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 from typing import Callable
 
@@ -64,6 +66,7 @@ class MasksAnnotation:
 
     def __init__(self) -> None:
         self.masks = []
+        self.xymasks = []
         self.label_map = {}
         self.mask_id: int = -1
 
@@ -75,7 +78,8 @@ class MasksAnnotation:
         self.label_map[mask_id] = label
 
     def get_mask(self, mask_id: int):
-        return self.masks[mask_id]
+        #return self.masks[mask_id]
+        return self.xymasks[mask_id]
 
     def get_label(self, mask_id: int):
         return self.label_map[mask_id]
@@ -103,6 +107,9 @@ class MasksAnnotation:
         if self.mask_id >= len(self.masks):
             raise StopIteration
         return self.masks[self.mask_id]
+
+    def add_xymask(self, mask):
+        self.xymasks.append(mask)
 
     def append(self, mask, label: str | None = None):
         self.add_mask(mask, label)
@@ -160,12 +167,15 @@ class Annotator:
             **dataclasses.asdict(settings)
         )
         masks = generator.generate(self.image)
+        print(f'--> {__file__} predict_all {masks = }')
         masks = [(m["segmentation"] * 255).astype(np.uint8) for m in masks]
         label = self.parent.annotation_layout.label_picker.currentItem().text()
+        print(f'predict_all {label = }')
         self.masks = MasksAnnotation.from_masks(masks, [label, ] * len(masks))
         self.cmap = get_cmap(len(self.masks))
 
     def make_prediction(self, annotation: dict):
+        print(f'--> {__file__} make_prediction {annotation["bounding_boxes"] = }')
         masks, scores, logits = self.predictor.predict(
             point_coords=annotation["points"],
             point_labels=annotation["labels"],
@@ -173,7 +183,13 @@ class Annotator:
             multimask_output=False
         )
         mask = masks[0]
+        print(f'--> {__file__} make_prediction1 {self.last_mask = }')
+        if self.last_mask:
+            print(f'{self.last_mask.sum()}')
         self.last_mask = mask * 255
+        print(f'--> {__file__} make_prediction255 {self.last_mask.sum()} {self.last_mask = }')
+
+        self.masks.add_xymask(self.last_mask)
 
     def pick_partial_mask(self):
         if self.partial_mask is None:
@@ -236,9 +252,16 @@ class Annotator:
         border = (border == 0).astype(np.uint8)
         return visualization, border
 
-    def make_instance_mask(self):
+    def make_instance_mask(self, mask_path = '', actual_shape = (32,32)):
+        print(f'--> make_instance_mask {mask_path = } {len(self.masks.xymasks) = }')
+        if mask_path is not None and mask_path != '' and len(self.masks.xymasks):
+            print(f'--> save mask {mask_path = } {actual_shape = }') 
+            mask_img = cv2.resize(self.masks.xymasks[0], actual_shape, interpolation=cv2.INTER_NEAREST)
+            cv2.imwrite(f'{mask_path}', mask_img)
+
         background = np.zeros_like(self.masks[0]) + 1
-        mask_argmax = np.argmax(np.concatenate([np.expand_dims(background, 0), np.array(self.masks.masks)], axis=0), axis=0).astype(np.uint8)
+        #mask_argmax = np.argmax(np.concatenate([np.expand_dims(background, 0), np.array(self.masks.masks)], axis=0), axis=0).astype(np.uint8)
+        mask_argmax = np.argmax(np.concatenate([np.expand_dims(background, 0), np.array(self.masks.xymasks)], axis=0), axis=0).astype(np.uint8)
         return mask_argmax
 
     def merge_image_visualization(self):

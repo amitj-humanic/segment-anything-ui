@@ -143,12 +143,14 @@ class SettingsLayout(QWidget):
         basename = os.path.splitext(os.path.basename(self.actual_file))[0]
         mask_path = os.path.join(path, basename + self.MASK_EXTENSION)
         labels_path = os.path.join(path, basename + self.LABELS_EXTENSION)
-        masks = self.parent().get_mask()
-        labels = self.parent().get_labels()
-        with open(labels_path, "w") as f:
-            json.dump(labels, f, indent=4)
-        masks = cv2.resize(masks, self.actual_shape, interpolation=cv2.INTER_NEAREST)
-        cv2.imwrite(mask_path, masks)
+        print(f'--> [*] on_save_mask {mask_path = } {self.actual_shape = }')
+        masks = self.parent().get_mask(mask_path, self.actual_shape)
+        # labels = self.parent().get_labels()
+        # with open(labels_path, "w") as f:
+        #     json.dump(labels, f, indent=4)
+        # masks = cv2.resize(masks, self.actual_shape, interpolation=cv2.INTER_NEAREST)
+        # print(f'--> [*] on_save_mask imwrite {mask_path = }')
+        # cv2.imwrite(mask_path, masks)
 
     def on_checkpoint_path_changed(self):
         self.parent().sam = self.parent().init_sam()
