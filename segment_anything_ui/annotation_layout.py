@@ -172,6 +172,8 @@ class AnnotationLayout(QWidget):
         if self.parent().image_label.paint_type == PaintType.POLYGON:
             self.parent().annotator.last_mask = self.parent().image_label.polygon.to_mask(
                 self.config.window_size[0], self.config.window_size[1])
-        self.parent().annotator.save_mask(label=self.label_picker.currentItem().text())
+        mask_path = self.parent().mask_path
+        actual_shape = self.parent().actual_shape
+        self.parent().annotator.save_mask(label=self.label_picker.currentItem().text(), mask_path=mask_path, actual_shape=actual_shape)
         self.parent().update(self.parent().annotator.merge_image_visualization())
         self.parent().image_label.clear()

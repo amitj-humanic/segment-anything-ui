@@ -97,6 +97,9 @@ class SettingsLayout(QWidget):
         image = cv2.imread(file, cv2.IMREAD_UNCHANGED)
         self.actual_shape = image.shape[:2][::-1]
         self.actual_file = file
+        self.path = os.path.split(self.actual_file)[0]
+        self.basename = os.path.splitext(os.path.basename(self.actual_file))[0]
+        self.mask_path = os.path.join(self.path, self.basename + self.MASK_EXTENSION)
         if len(image.shape) == 2:
             image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
         else:
@@ -107,7 +110,7 @@ class SettingsLayout(QWidget):
                            (int(self.parent().config.window_size[0]), self.parent().config.window_size[1]))
         self.parent().annotator.clear()
         self.parent().image_label.clear()
-        self.parent().set_image(image)
+        self.parent().set_image(image, self.mask_path, self.actual_shape)
         if os.path.exists(mask) and os.path.exists(labels):
             self._load_annotation(mask, labels)
             self.parent().update(self.parent().annotator.merge_image_visualization())

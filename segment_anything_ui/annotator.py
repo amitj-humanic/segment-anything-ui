@@ -253,11 +253,11 @@ class Annotator:
         return visualization, border
 
     def make_instance_mask(self, mask_path = '', actual_shape = (32,32)):
-        print(f'--> make_instance_mask {mask_path = } {len(self.masks.xymasks) = }')
-        if mask_path is not None and mask_path != '' and len(self.masks.xymasks):
-            print(f'--> save mask {mask_path = } {actual_shape = }') 
-            mask_img = cv2.resize(self.masks.xymasks[0], actual_shape, interpolation=cv2.INTER_NEAREST)
-            cv2.imwrite(f'{mask_path}', mask_img)
+        #print(f'--> make_instance_mask {mask_path = } {len(self.masks.xymasks) = }')
+        #if mask_path is not None and mask_path != '' and len(self.masks.xymasks):
+        #    print(f'--> save mask {mask_path = } {actual_shape = }') 
+        #    mask_img = cv2.resize(self.masks.xymasks[0], actual_shape, interpolation=cv2.INTER_NEAREST)
+        #    cv2.imwrite(f'{mask_path}', mask_img)
 
         background = np.zeros_like(self.masks[0]) + 1
         #mask_argmax = np.argmax(np.concatenate([np.expand_dims(background, 0), np.array(self.masks.masks)], axis=0), axis=0).astype(np.uint8)
@@ -277,12 +277,19 @@ class Annotator:
     def make_labels(self):
         return self.masks.label_map
 
-    def save_mask(self, label: str = MasksAnnotation.DEFAULT_LABEL):
+    def save_mask(self, label: str = MasksAnnotation.DEFAULT_LABEL, mask_path = '', actual_shape = (32,32)):
         if self.partial_mask is not None:
             last_mask = self.partial_mask
             self.partial_mask = None
         else:
             last_mask = self.last_mask
+
+        print(f'--> make_instance_mask {mask_path = } {len(self.masks.xymasks) = }')
+        if mask_path is not None and mask_path != '' and last_mask is not None:
+            print(f'--> save mask {mask_path = } {actual_shape = }') 
+            mask_img = cv2.resize(last_mask, actual_shape, interpolation=cv2.INTER_NEAREST)
+            cv2.imwrite(f'{mask_path}', mask_img)
+
         self.masks.append(last_mask, label=label)
         if len(self.masks) >= self.MAX_MASKS:
             self.MAX_MASKS += 10
